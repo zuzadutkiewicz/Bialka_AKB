@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1452377707 source:c:\users\zuza\gitrepos\bialka_akb\bialka_akb\main.cpp
+	<iostream>
+	<iostream>
+	<stdio.h>
+	<fstream>
+	<stdlib.h>
+	<string.h>
+
