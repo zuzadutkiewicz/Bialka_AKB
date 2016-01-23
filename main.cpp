@@ -11,7 +11,6 @@
 using namespace std;
 
 
-
 struct sekwencja
 {
     string amino;
@@ -19,7 +18,7 @@ struct sekwencja
     int liczElem;
 };
 
-struct sekwencja instacja[ROZM_TAB];
+struct sekwencja instancja[ROZM_TAB];
 int **grafSkojarzen;
 
 void odczytajZPliku(const char * nazwaPliku);
@@ -30,7 +29,8 @@ void utworzGrafSkojarzen();
 void drukujGrafSkojarzen();
 
 int okno = 5;
-int wiarygodnosc = 10;
+int wiarygodnosc = 0;
+
 
 int main()
 {
@@ -56,12 +56,11 @@ void odczytajZPliku(const char * nazwaPliku)
 
     while(getline(plik,lineAmin))
     {
-
         int liczAmin = 0;
 
-        instacja[element].amino = lineAmin;
+        instancja[element].amino = lineAmin;
         liczAmin =  lineAmin.length() + 1;
-        cout << "Amin: " << instacja[element].amino[liczAmin] << endl;
+        cout << "Amin: " << instancja[element].amino[liczAmin] << endl;
         getline(plik,lineWag);
 
         const char * bufWag = lineWag.c_str();
@@ -82,8 +81,8 @@ void odczytajZPliku(const char * nazwaPliku)
                 int dana = 0;
                 buflicz[j] = '\0';
                 dana = atoi(buflicz);
-                instacja[element].wagi[liczWag] = dana;
-                cout << instacja[element].wagi[liczWag] << " ";
+                instancja[element].wagi[liczWag] = dana;
+                cout << instancja[element].wagi[liczWag] << " ";
                 liczWag++;
                 j = 0;
             }
@@ -102,7 +101,7 @@ void odczytajZPliku(const char * nazwaPliku)
             cout << "Wybieram mniejszą wartosc." << endl;
         }
 
-        instacja[element].liczElem = liczAmin > liczWag ? liczWag : liczAmin;
+        instancja[element].liczElem = liczAmin > liczWag ? liczWag : liczAmin;
 
         cout << endl << "Koniec instancji" << endl;
 
@@ -123,8 +122,8 @@ void porownaj()
         {
             if ( wiersz1 == wiersz2)
                 continue;
-            for (int kolumna1 = 0; kolumna1 < instacja[wiersz1].liczElem - okno; kolumna1++)
-                for (int kolumna2 =0; kolumna2 < instacja[wiersz2].liczElem - okno; kolumna2++)
+            for (int kolumna1 = 0; kolumna1 < instancja[wiersz1].liczElem - okno; kolumna1++)
+                for (int kolumna2 =0; kolumna2 < instancja[wiersz2].liczElem - okno; kolumna2++)
                 {
                     int ret = porownajAmin(wiersz1, kolumna1, wiersz2, kolumna2);
 
@@ -142,19 +141,42 @@ void porownaj()
 
 int porownajAmin(int wiersz1, int kolumna1, int wiersz2, int kolumna2)
 {
-    string amino1 = instacja[wiersz1].amino.substr(kolumna1, okno);
-    string amino2 = instacja[wiersz2].amino.substr(kolumna2, okno);
+    string amino1 = instancja[wiersz1].amino.substr(kolumna1, okno);
+    string amino2 = instancja[wiersz2].amino.substr(kolumna2, okno);
+    string aminoW1 = "";
+    string aminoW2 = "";
+
     if( amino1.compare(amino2) == 0)
-    {
         return 1;
+
+    for(int i = 0; i < okno; i++)
+    {
+        if ( instancja[wiersz1].wagi[kolumna1 + i] > wiarygodnosc)
+            aminoW1 = aminoW1 + amino1.substr(i, 1);
+        if ( instancja[wiersz2].wagi[kolumna2 + i] > wiarygodnosc)
+            aminoW2 = aminoW2 + amino2.substr(i, 1);
     }
+
+    if ( aminoW1.compare("") != 0 && aminoW2.compare("") != 0 )
+    {
+        size_t found1 = amino1.find(aminoW2);
+        if ( found1 != string::npos )
+            return 1;
+
+        size_t found2 = amino1.find(aminoW2);
+        if ( found2 != string::npos )
+            return 1;
+    }
+
     return 0;
 }
+
 
 int indexTablicy(int wiersz, int kolumna)
 {
     return wiersz * MAX_LICZ_ELEM + kolumna;
 }
+
 
 void utworzGrafSkojarzen()
 {
@@ -162,6 +184,7 @@ void utworzGrafSkojarzen()
     for ( int i = 0; i < ROZM_TAB * MAX_LICZ_ELEM; ++i )
         grafSkojarzen[i] = new int [ROZM_TAB * MAX_LICZ_ELEM];
 }
+
 
 void drukujGrafSkojarzen()
 {
