@@ -18,6 +18,16 @@ struct sekwencja
     int liczElem;
 };
 
+struct skojarz
+{
+    int wiersz;
+    int kolumna;
+} ;
+
+struct skojarz skojarzTabl[ROZM_TAB][MAX_LICZ_ELEM];
+int skojarzMaxOdl = 0;
+int skojarzGlebokosc = 0;
+
 struct sekwencja instancja[ROZM_TAB];
 int **grafSkojarzen;
 
@@ -27,10 +37,17 @@ int porownajAmin(int wiersz1, int  kolumna1, int wiersz2, int kolumna2);
 int indexTablicy(int wiersz, int kolumna);
 void utworzGrafSkojarzen();
 void drukujGrafSkojarzen();
-
+int skojarzNast(int wiersz, int kolumna, struct skojarz skojarzTmp);
+void zerujSkojarzTablPoz();
+int generujBialka();
+int nastepnyPoziom(int wiersz, int kolumna);
+void drukujBialka();
 int okno = 5;
 int wiarygodnosc = 0;
 
+int maxOpuszczone = 3;
+int minLiczElem = 4;
+int glebokoscSzukania = 4;
 
 int main()
 {
@@ -38,6 +55,93 @@ int main()
     utworzGrafSkojarzen();
     porownaj();
     drukujGrafSkojarzen();
+    int jest = generujBialka();
+    if( jest == 1)
+    {
+        drukujBialka();
+    }
+}
+
+int generujBialka()
+{
+    int opuszczone = 0;
+    int liczbaElem = 0;
+    for(int i = 0; i < MAX_LICZ_ELEM; i++)
+    {
+        if( skojarzTabl[0][i].wiersz == -1)
+            break;
+        int znaleziony = nastepnyPoziom(0,i);
+        if(znaleziony == 1)
+            liczbaElem = liczbaElem + 1;
+        else
+            opuszczone = opuszczone + 1;
+
+        if(opuszczone > maxOpuszczone)
+            break;
+    }
+    if(liczbaElem >= minLiczElem)
+        return 1;
+    return 0;
+}
+
+int nastepnyPoziom(int wiersz, int kolumna)
+{
+    struct skojarz skojarzTmp;
+    wiersz++;
+    if(wiersz > glebokoscSzukania)
+        return 1;
+    if(skojarzNast(wiersz, kolumna, skojarzTmp) == 1)
+        if( nastepnyPoziom(wiersz, kolumna) == 1)
+    {
+        // TO_DO wpisac do tablicy znalezionych
+        return 1;
+    }
+    return 0;
+}
+
+void drukujBialka()
+{
+    for(int i = 0; i < ROZM_TAB; i++)
+    {
+        for(int j = 0; j < MAX_LICZ_ELEM; j++)
+        {
+            int wiersz = skojarzTabl[i][j].wiersz;
+            int kolumn = skojarzTabl[i][j].kolumna;
+            string amino  = instancja[wiersz].amino.substr(kolumn, okno);
+            if( skojarzTabl[i][j].wiersz > -1)
+            {
+            cout << " wiersz: " << wiersz
+                 << " kolumn: " << kolumn
+                 << " amino:"   << amino
+                 << endl;
+            }
+        }
+        cout << endl;
+    }
+}
+
+
+int skojarzNast(int linia, int kolumna, struct skojarz skojarzTmp)
+{
+    for(int i = kolumna; i <= kolumna + maxOpuszczone; i++)
+    {
+        // na podstawie linia i kolumna ustalic poprzednie wartosci
+        // w tablicy skojarzen i sprawdzic czy sa odpowiednie skojarzenia
+        // w danym wierszu z ewentualnym przesuniecie o maxOpuszczone
+        if( grafSkojarzen[linia][i] == 1 )
+        {
+        }
+    }
+        return 0;
+}
+void zerujSkojarzTablPoz()
+{
+    for(int i = 0; i < ROZM_TAB; i++)
+        for(int j = 0; j < MAX_LICZ_ELEM; j++)
+        {
+            skojarzTabl[i][j].wiersz = -1;
+            skojarzTabl[i][j].kolumna = -1;
+        }
 }
 
 
@@ -129,10 +233,16 @@ void porownaj()
 
                     if( ret == 1)
                     {
-                        grafSkojarzen[indexTablicy(wiersz1, kolumna1)][indexTablicy(wiersz2, kolumna2)] =1;
-                        grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] =1;
+                        grafSkojarzen[indexTablicy(wiersz1, kolumna1)][indexTablicy(wiersz2, kolumna2)] = 1;
+                        grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 1;
                         //    cout << " amino1 " << wiersz1 << " " << kolumna1 << " idx " << indexTablicy(wiersz1, kolumna1) << endl;
                         //    cout << " amino2 " << wiersz2 << " " << kolumna2 << " idx " << indexTablicy(wiersz2, kolumna2) << endl << endl;
+                    }
+                    else
+                    {
+                        grafSkojarzen[indexTablicy(wiersz1, kolumna1)][indexTablicy(wiersz2, kolumna2)] = 0;
+                        grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 0;
+
                     }
                 }
         }
@@ -182,7 +292,11 @@ void utworzGrafSkojarzen()
 {
     grafSkojarzen = new int *[ROZM_TAB * MAX_LICZ_ELEM];
     for ( int i = 0; i < ROZM_TAB * MAX_LICZ_ELEM; ++i )
+    {
         grafSkojarzen[i] = new int [ROZM_TAB * MAX_LICZ_ELEM];
+        for(int j = 0; j < ROZM_TAB * MAX_LICZ_ELEM; j++)
+                grafSkojarzen[i][j] = -1;
+    }
 }
 
 
@@ -193,3 +307,4 @@ void drukujGrafSkojarzen()
             if(grafSkojarzen[i][j] == 1)
                 cout << "grafSkojarzen[" << i << "][" << j << "]=" << grafSkojarzen[i][j] << endl;
 }
+
