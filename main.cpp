@@ -38,12 +38,14 @@ void zerujSkojarzTablPoz();
 int generujBialka();
 int nastepnyPoziom(int poziom, int skojarzKol, int wiersz, int kolumna);
 void drukujBialka();
-int okno = 5;
-int wiarygodnosc = 28;
 
-int maxOpuszczone = 30;
-int minLiczElem = 6;
-int glebokoscSzukania = 5;
+// parametry
+int okno = 5;
+int wiarygodnosc = 26;
+
+int maxOpuszczone = 20;
+int minLiczElem = 3;
+int glebokoscSzukania = 6;
 
 
 int main()
@@ -221,13 +223,13 @@ int porownajAmin(int wiersz1, int kolumna1, int wiersz2, int kolumna2)
     }
 
     if ( aminoW1.compare("") == 0 || aminoW2.compare("") == 0 )
-        return 0;
+        return 1;
 
     size_t found1 = amino1.find(aminoW2);
     if ( found1 != string::npos )
         return 1;
 
-    size_t found2 = amino1.find(aminoW2);
+    size_t found2 = amino2.find(aminoW1);
     if ( found2 != string::npos )
         return 1;
 
