@@ -76,7 +76,7 @@ int wiarygodnosc = 26;
 
 int maxOpuszczone = 20;
 int minLiczElem = 3;
-int glebokoscSzukania = 6;
+int glebokoscSzukania = 5;
 
 
 int main()
@@ -90,55 +90,61 @@ int main()
 
 int generujBialka()
 {
-    int opuszczone = 0;
-    int liczbaElem = 0;
-    int skojarzKol = 0;
-    int wiersz = 0;
-    int znalezione = 0;
-    int poziomZasiegu = 0;
-    zerujSkojarzTablPoz();
-    for(int kolumna = 0; kolumna < MAX_LICZ_ELEM - okno; kolumna++)
-    {
-        int skojarzWiersz = 0;
-        int jest = nastepnyPoziom(skojarzWiersz, skojarzKol, wiersz, kolumna);
-        if(jest == 1 )
-        {
-            liczbaElem = liczbaElem + 1;
-            skojarzTabl[skojarzWiersz][skojarzKol].wiersz = wiersz;
-            skojarzTabl[skojarzWiersz][skojarzKol].kolumna = kolumna;
-            skojarzKol++;
-        }
-        else
-            opuszczone = opuszczone + 1;
 
-        if(opuszczone > maxOpuszczone)
+    for(int wierszX = 0; wierszX < 8; wierszX++)
+    {
+        int opuszczone = 0;
+        int liczbaElem = 0;
+        int skojarzKol = 0;
+        int znalezione = 0;
+        int poziomZasiegu = 0;
+        int wiersz = wierszX % ROZM_TAB;
+        zerujSkojarzTablPoz();
+
+        for(int kolumna = 0; kolumna < MAX_LICZ_ELEM - okno; kolumna++)
         {
-            // drukuj i wyczysc tablice i szukaj dalsze elementow
-            if(liczbaElem >= minLiczElem)
+            int skojarzWiersz = 0;
+            int jest = nastepnyPoziom(skojarzWiersz, skojarzKol, wiersz, kolumna);
+            if(jest == 1 )
             {
-                cout << "Znalezione elementy:" << endl;
-                drukujBialka();
-                poziomZasiegu++;
-                ostringstream ss;
-                ss << poziomZasiegu;
-                string str = ss.str();
-                wpiszZasiegTabl(str );
-
-                znalezione = 1;
+                liczbaElem = liczbaElem + 1;
+                skojarzTabl[skojarzWiersz][skojarzKol].wiersz = wiersz;
+                skojarzTabl[skojarzWiersz][skojarzKol].kolumna = kolumna;
+                skojarzKol++;
             }
-            zerujSkojarzTablPoz();
-            liczbaElem = 0;
-            skojarzKol = 0;
+            else
+                opuszczone = opuszczone + 1;
+
+            if(opuszczone > maxOpuszczone)
+            {
+                // drukuj i wyczysc tablice i szukaj dalsze elementow
+                if(liczbaElem >= minLiczElem)
+                {
+                    cout << "Znalezione elementy:" << endl;
+                    drukujBialka();
+                    poziomZasiegu++;
+                    ostringstream ss;
+                    ss << "(" << wierszX << ")" << poziomZasiegu;
+                    string str = ss.str();
+                    wpiszZasiegTabl(str );
+
+                    znalezione = 1;
+                }
+                zerujSkojarzTablPoz();
+                liczbaElem = 0;
+                skojarzKol = 0;
+            }
+            // przejscie do nastepnej kolumny
+            // skojarzKol++;
         }
-        // przejscie do nastepnej kolumny
-        // skojarzKol++;
+        if(liczbaElem >= minLiczElem)
+        {
+            drukujBialka();
+        }
+        if( znalezione == 0)
+            cout << " Brak rozwiazan." << endl;
+
     }
-    if(liczbaElem >= minLiczElem)
-    {
-        drukujBialka();
-    }
-    if( znalezione == 0)
-        cout << " Brak rozwiazan." << endl;
 
     return 0;
 }
@@ -256,9 +262,9 @@ void wpiszZasiegTabl(string poziom)
                  << " kolMin: " << kolMin
                  << " kolMax: " << kolMax << endl;
             zasiegTabl[wiersz][kolMin].przed =
-                        zasiegTabl[wiersz][kolMin].przed + "[" + poziom + ">";
+                zasiegTabl[wiersz][kolMin].przed + "[" + poziom + ">";
             zasiegTabl[wiersz][kolMax].po    =
-                        "<" + poziom + "]" + zasiegTabl[wiersz][kolMax].po;
+                "<" + poziom + "]" + zasiegTabl[wiersz][kolMax].po;
         }
     }
     cout << endl;
@@ -410,7 +416,7 @@ void wpiszKoniecTabl()
 
 void drukujKoniectabl()
 {
-        for(int i = 0; i < ROZM_TAB; i++)
-            cout <<  " wiersz: " << i << " Amino:" << koniecTabl[i] << endl;
+    for(int i = 0; i < ROZM_TAB; i++)
+        cout <<  " wiersz: " << i << " Amino:" << koniecTabl[i] << endl;
 
 }
