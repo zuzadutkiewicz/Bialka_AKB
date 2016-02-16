@@ -15,9 +15,9 @@
 	<stdlib.h>
 	<string.h>
 
-1455575922 source:c:\workcpacecodeb\bialka_akb\main.cpp
+1455583033 source:c:\workcpacecodeb\bialka_akb\main.cpp
 	<iostream>
-	<iostream>
+	<sstream>
 	<stdio.h>
 	<fstream>
 	<stdlib.h>
