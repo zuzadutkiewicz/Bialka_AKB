@@ -7,9 +7,9 @@
 	<stdlib.h>
 	<string.h>
 
-1452633230 source:c:\users\zuza\gitrepos\bialka_akb1\main.cpp
+1455833996 source:c:\users\zuza\gitrepos\bialka_akb1\main.cpp
 	<iostream>
-	<iostream>
+	<sstream>
 	<stdio.h>
 	<fstream>
 	<stdlib.h>

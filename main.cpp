@@ -74,13 +74,25 @@ void drukujBialka();
 int okno = 5;
 int wiarygodnosc = 26;
 
-int maxOpuszczone = 20;
+int maxOpuszczone = 5;
 int minLiczElem = 3;
-int glebokoscSzukania = 5;
+int glebokoscSzukania = 2;
 
 
 int main()
 {
+    printf("Podaj wartosc okna: ");
+    scanf("%d", &okno);
+    if ( 3 < okno > 8)
+    {
+        printf("Niepoprawny zakres liczby.\n");
+        printf("Podaj liczbe z zakresu 4 -7. \n");
+        printf("Podaj wartosc okna: ");
+        scanf("%d", &okno);
+    }
+    printf("Podaj wartosc wiarygodnosci: ");
+    scanf("%d", &wiarygodnosc);
+
     odczytajZPliku("instacja.txt");
     generujBialka();
     wpiszKoniecTabl();
@@ -91,7 +103,7 @@ int main()
 int generujBialka()
 {
 
-    for(int wierszX = 0; wierszX < 8; wierszX++)
+    for(int wierszX = 0; wierszX < 4; wierszX++)
     {
         int opuszczone = 0;
         int liczbaElem = 0;
@@ -257,7 +269,7 @@ void wpiszZasiegTabl(string poziom)
         }
         if( wiersz != -1)
         {
-            kolMax = kolMax + okno;
+            kolMax = kolMax + okno - 1;
             cout << " wiersz: " << wiersz
                  << " kolMin: " << kolMin
                  << " kolMax: " << kolMax << endl;
