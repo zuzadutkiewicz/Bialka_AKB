@@ -74,7 +74,7 @@ void drukujBialka();
 int okno = 5;
 int wiarygodnosc = 26;
 
-int maxOpuszczone = 5;
+int maxOpuszczone = 20;
 int minLiczElem = 3;
 int glebokoscSzukania = 2;
 
@@ -103,7 +103,7 @@ int main()
 int generujBialka()
 {
 
-    for(int wierszX = 0; wierszX < 4; wierszX++)
+    for(int wierszX = 6; wierszX < 7; wierszX++)
     {
         int opuszczone = 0;
         int liczbaElem = 0;
@@ -199,7 +199,10 @@ int skojarzNast(int skojarzWiersz, int skojarzKol, int wiersz, int kolumna, stru
 
     for(int i = kolumnaTmp; i <= kolumnaMax; i++)
     {
-        int jestRowne = porownajAmin(wiersz -1, kolumna, wiersz, i);
+        // znajdz poprzedni wiersz
+        int wierszp = wiersz == 0 ? ROZM_TAB -1 : wiersz - 1;
+
+        int jestRowne = porownajAmin(wierszp, kolumna, wiersz, i);
         if( jestRowne == 1 )
         {
             skojarzTmp->wiersz = wiersz;
