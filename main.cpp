@@ -49,7 +49,7 @@ void zerujSkojarzTablPoz();
 void szukajKlik();
 void drukujKlik();
 
-int okno = 5;
+int okno = 4;
 int wiarygodnosc = 5;
 
 int maxOpuszczone = 2;
@@ -163,12 +163,12 @@ void porownaj()
                     if( ret == 1)
                     {
                         grafSkojarzen[indexTablicy(wiersz1, kolumna1)][indexTablicy(wiersz2, kolumna2)] = 1;
-                        grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 1;
+                    //    grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 1;
                     }
                     else
                     {
                         grafSkojarzen[indexTablicy(wiersz1, kolumna1)][indexTablicy(wiersz2, kolumna2)] = 0;
-                        grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 0;
+                    //    grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 0;
 
                     }
                 }
