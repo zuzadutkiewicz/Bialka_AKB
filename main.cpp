@@ -6,7 +6,7 @@
 #include <string.h>
 
 #define ROZM_TAB 7
-#define MAX_LICZ_ELEM 300
+#define MAX_LICZ_ELEM 1000
 
 using namespace std;
 
@@ -108,8 +108,8 @@ void drukujKlik()
         {
             if(kliki[i][j].liczElem == 0)
                 continue;
-              cout << " pozycja1="  << kliki[i][j].p1.wiersz << "," << " pozycja2=" << kliki[i][j].p1.kolumna
-                 << " pozycja1="  << kliki[i][j].p2.wiersz << "," << " pozycja2=" << kliki[i][j].p2.kolumna
+              cout << " w1="  << kliki[i][j].p1.wiersz << "," << " k1=" << kliki[i][j].p1.kolumna
+                 << " w2="  << kliki[i][j].p2.wiersz << "," << " k2=" << kliki[i][j].p2.kolumna
                  << " liczbaEl=" << kliki[i][j].liczElem
                  << " Amino1:" << instancja[kliki[i][j].p1.wiersz].amino.substr(kliki[i][j].p1.kolumna, okno)
                  << " Amino2:" << instancja[kliki[i][j].p2.wiersz].amino.substr(kliki[i][j].p2.kolumna, okno)
