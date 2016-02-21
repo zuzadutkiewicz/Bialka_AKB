@@ -1,29 +1,12 @@
-/*
-Copyright (C) 2016  Zuzanna Dutkiewicz
-
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-*/
 #include <iostream>
-#include <sstream>
+#include <iostream>
 #include <stdio.h>
 #include <fstream>
 #include <stdlib.h>
 #include <string.h>
 
 #define ROZM_TAB 7
-#define MAX_LICZ_ELEM 200
+#define MAX_LICZ_ELEM 300
 
 using namespace std;
 
@@ -35,187 +18,165 @@ struct sekwencja
     int liczElem;
 };
 
-struct skojarz
+struct pozycja
 {
     int wiersz;
     int kolumna;
+};
+
+struct klik
+{
+    struct pozycja p1;
+    struct pozycja p2;
+    int liczElem;
 } ;
 
-struct skojarz skojarzTabl[ROZM_TAB][MAX_LICZ_ELEM];
+struct klik kliki[MAX_LICZ_ELEM][MAX_LICZ_ELEM];
 int skojarzMaxOdl = 0;
 int skojarzGlebokosc = 0;
 
-struct zasieg
-{
-    string przed;
-    string po;
-};
-
-struct zasieg zasiegTabl[ROZM_TAB][MAX_LICZ_ELEM];
-
 struct sekwencja instancja[ROZM_TAB];
-
-string koniecTabl[ROZM_TAB];
-
-void wpiszKoniecTabl();
-void drukujKoniectabl();
-void wpiszZasiegTabl(string poziom);
+int **grafSkojarzen;
 
 void odczytajZPliku(const char * nazwaPliku);
-int porownajAmin(int wiersz1, int  kolumna1, int wiersz2, int kolumna2);
-int skojarzNast(int skojarzWiersz, int skojarzKol, int wiersz, int kolumna, struct skojarz * skojarzTmp);
+void porownaj();
+int porownajAmin(unsigned int wiersz1, unsigned int  kolumna1, unsigned int wiersz2, unsigned int kolumna2);
+int indexTablicy(int wiersz, int kolumna);
+int dajiWylaczSkos(unsigned int wiersz, unsigned int kolumna);
+void utworzGrafSkojarzen();
+void drukujGrafSkojarzen();
 void zerujSkojarzTablPoz();
-void czyscZasiegTabl();
-int generujBialka();
-int nastepnyPoziom(int poziom, int skojarzKol, int wiersz, int kolumna);
-void drukujBialka();
+void szukajKlik();
+void drukujKlik();
 
-// parametry
 int okno = 5;
-int wiarygodnosc = 26;
+int wiarygodnosc = 5;
 
-int maxOpuszczone = 20;
-int minLiczElem = 3;
-int glebokoscSzukania = 2;
+int maxOpuszczone = 2;
+
 
 
 int main()
 {
-    printf("Podaj wartosc okna: ");
-    scanf("%d", &okno);
-    if ( 3 < okno > 8)
-    {
-        printf("Niepoprawny zakres liczby.\n");
-        printf("Podaj liczbe z zakresu 4 -7. \n");
-        printf("Podaj wartosc okna: ");
-        scanf("%d", &okno);
-    }
-    printf("Podaj wartosc wiarygodnosci: ");
-    scanf("%d", &wiarygodnosc);
-
     odczytajZPliku("instacja.txt");
-    generujBialka();
-    wpiszKoniecTabl();
-    drukujKoniectabl();
+    utworzGrafSkojarzen();
+    porownaj();
+   // drukujGrafSkojarzen();
+    szukajKlik();
+    drukujKlik();
+}
+
+void szukajKlik()
+{
+    int xKlik = 0;
+    int yKlik = 0;
+
+    for(int i = 0; i < ROZM_TAB * MAX_LICZ_ELEM; i++)
+    {
+        int pklik = 0;
+        for(int j = 0; j < ROZM_TAB * MAX_LICZ_ELEM; j++)
+            if(grafSkojarzen[i][j] == 1)
+            {
+                int ileSkos = dajiWylaczSkos(i, j);
+                kliki[xKlik][yKlik].p1.wiersz = (unsigned int) i / MAX_LICZ_ELEM;
+                kliki[xKlik][yKlik].p1.kolumna= (unsigned int) i % MAX_LICZ_ELEM;
+                kliki[xKlik][yKlik].p2.wiersz = (unsigned int) j / MAX_LICZ_ELEM;
+                kliki[xKlik][yKlik].p2.kolumna= (unsigned int)j % MAX_LICZ_ELEM;
+                kliki[xKlik][yKlik].liczElem = ileSkos;
+                pklik = 1;
+                yKlik++;
+            }
+        if( pklik == 1)
+        {
+            xKlik++;
+            pklik = 0;
+        }
+        if(xKlik >= MAX_LICZ_ELEM || yKlik >= MAX_LICZ_ELEM)
+        {
+            cout << " Za duza liczba elementow w tablicy klik" << xKlik << " " << yKlik;
+            return;
+        }
+    }
 }
 
 
-int generujBialka()
+void drukujKlik()
 {
-
-    for(int wierszX = 6; wierszX < 7; wierszX++)
-    {
-        int opuszczone = 0;
-        int liczbaElem = 0;
-        int skojarzKol = 0;
-        int znalezione = 0;
-        int poziomZasiegu = 0;
-        int wiersz = wierszX % ROZM_TAB;
-        zerujSkojarzTablPoz();
-
-        for(int kolumna = 0; kolumna < MAX_LICZ_ELEM - okno; kolumna++)
+    cout << " Wydruk klik" << endl;
+    for(int i = 0; i < MAX_LICZ_ELEM; i++)
+        for(int j = 0; j < MAX_LICZ_ELEM; j++)
         {
-            int skojarzWiersz = 0;
-            int jest = nastepnyPoziom(skojarzWiersz, skojarzKol, wiersz, kolumna);
-            if(jest == 1 )
-            {
-                liczbaElem = liczbaElem + 1;
-                skojarzTabl[skojarzWiersz][skojarzKol].wiersz = wiersz;
-                skojarzTabl[skojarzWiersz][skojarzKol].kolumna = kolumna;
-                skojarzKol++;
-            }
-            else
-                opuszczone = opuszczone + 1;
+            if(kliki[i][j].liczElem == 0)
+                continue;
+              cout << " pozycja1="  << kliki[i][j].p1.wiersz << "," << " pozycja2=" << kliki[i][j].p1.kolumna
+                 << " pozycja1="  << kliki[i][j].p2.wiersz << "," << " pozycja2=" << kliki[i][j].p2.kolumna
+                 << " liczbaEl=" << kliki[i][j].liczElem
+                 << " Amino1:" << instancja[kliki[i][j].p1.wiersz].amino.substr(kliki[i][j].p1.kolumna, okno)
+                 << " Amino2:" << instancja[kliki[i][j].p2.wiersz].amino.substr(kliki[i][j].p2.kolumna, okno)
+                << endl;
+        }
+}
 
-            if(opuszczone > maxOpuszczone)
-            {
-                // drukuj i wyczysc tablice i szukaj dalsze elementow
-                if(liczbaElem >= minLiczElem)
+
+int dajiWylaczSkos(unsigned int wiersz, unsigned int kolumna)
+{
+    int wWiersz = wiersz;
+    int wKol = kolumna;
+    int liczElem = 0;
+    while(grafSkojarzen[wWiersz][wKol] == 1)
+    {
+        grafSkojarzen[wWiersz][wKol] = 2;
+        wWiersz++;
+        wKol++;
+        liczElem++;
+    }
+    return liczElem;
+}
+
+
+void zerujSkojarzTablPoz()
+{
+    for(int i = 0; i < MAX_LICZ_ELEM; i++)
+        for(int j = 0; j < MAX_LICZ_ELEM; j++)
+        {
+            kliki[i][j].p1.wiersz = -1;
+            kliki[i][j].p1.kolumna = -1;
+            kliki[i][j].p2.wiersz = -1;
+            kliki[i][j].p2.kolumna = -1;
+            kliki[i][j].liczElem = 0;
+        }
+}
+
+
+void porownaj()
+{
+    for (unsigned int wiersz1 = 0; wiersz1 < ROZM_TAB; wiersz1++)
+        for (unsigned int wiersz2 =0; wiersz2 < ROZM_TAB; wiersz2++)
+        {
+            if ( wiersz1 == wiersz2)
+                continue;
+            for (int kolumna1 = 0; kolumna1 < instancja[wiersz1].liczElem - okno; kolumna1++)
+                for (int kolumna2 =0; kolumna2 < instancja[wiersz2].liczElem - okno; kolumna2++)
                 {
-                    cout << "Znalezione elementy:" << endl;
-                    drukujBialka();
-                    poziomZasiegu++;
-                    ostringstream ss;
-                    ss << "(" << wierszX << ")" << poziomZasiegu;
-                    string str = ss.str();
-                    wpiszZasiegTabl(str );
+                    int ret = porownajAmin(wiersz1, kolumna1, wiersz2, kolumna2);
 
-                    znalezione = 1;
+                    if( ret == 1)
+                    {
+                        grafSkojarzen[indexTablicy(wiersz1, kolumna1)][indexTablicy(wiersz2, kolumna2)] = 1;
+                        grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 1;
+                    }
+                    else
+                    {
+                        grafSkojarzen[indexTablicy(wiersz1, kolumna1)][indexTablicy(wiersz2, kolumna2)] = 0;
+                        grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 0;
+
+                    }
                 }
-                zerujSkojarzTablPoz();
-                liczbaElem = 0;
-                skojarzKol = 0;
-            }
-            // przejscie do nastepnej kolumny
-            // skojarzKol++;
         }
-        if(liczbaElem >= minLiczElem)
-        {
-            drukujBialka();
-        }
-        if( znalezione == 0)
-            cout << " Brak rozwiazan." << endl;
-
-    }
-
-    return 0;
 }
 
 
-int nastepnyPoziom(int skojarzWiersz, int skojarzKol, int wiersz, int kolumna)
-{
-    struct skojarz skojarzTmp;
-    wiersz++;
-    wiersz = wiersz % ROZM_TAB;
-    skojarzWiersz++;
-    if(skojarzWiersz >= glebokoscSzukania)
-        return 1;
-    if(skojarzNast(skojarzWiersz, skojarzKol, wiersz, kolumna, &skojarzTmp) == 1)
-    {
-        if( nastepnyPoziom(skojarzWiersz, skojarzKol, skojarzTmp.wiersz, skojarzTmp.kolumna) == 1)
-        {
-            skojarzTabl[skojarzWiersz][skojarzKol].wiersz  = skojarzTmp.wiersz;
-            skojarzTabl[skojarzWiersz][skojarzKol].kolumna = skojarzTmp.kolumna;
-            return 1;
-        }
-    }
-    return 0;
-}
-
-
-
-
-int skojarzNast(int skojarzWiersz, int skojarzKol, int wiersz, int kolumna, struct skojarz * skojarzTmp)
-{
-    // na podstawie linia i kolumna ustalic poprzednie wartosci
-    // w danym wierszu z ewentualnym przesuniecie o maxOpuszczone
-    int kolumnaTmp = 0;
-
-    if(skojarzKol > 0)
-        kolumnaTmp = skojarzTabl[skojarzWiersz][skojarzKol - 1].kolumna + 1;
-
-    // nie moze przekraczac maksymalnej liczby elementow
-    int kolumnaMax = kolumnaTmp + maxOpuszczone > MAX_LICZ_ELEM ? MAX_LICZ_ELEM : kolumnaTmp + maxOpuszczone;
-
-    for(int i = kolumnaTmp; i <= kolumnaMax; i++)
-    {
-        // znajdz poprzedni wiersz
-        int wierszp = wiersz == 0 ? ROZM_TAB -1 : wiersz - 1;
-
-        int jestRowne = porownajAmin(wierszp, kolumna, wiersz, i);
-        if( jestRowne == 1 )
-        {
-            skojarzTmp->wiersz = wiersz;
-            skojarzTmp->kolumna = i;
-            return 1;
-        }
-    }
-    return 0;
-}
-
-
-
-int porownajAmin(int wiersz1, int kolumna1, int wiersz2, int kolumna2)
+int porownajAmin(unsigned int wiersz1, unsigned int kolumna1, unsigned int wiersz2, unsigned int kolumna2)
 {
     if(kolumna1 + okno > instancja[wiersz1].amino.length() )
         return 0;
@@ -238,7 +199,7 @@ int porownajAmin(int wiersz1, int kolumna1, int wiersz2, int kolumna2)
     }
 
     if ( aminoW1.compare("") == 0 || aminoW2.compare("") == 0 )
-        return 1;
+        return 0;
 
     size_t found1 = amino1.find(aminoW2);
     if ( found1 != string::npos )
@@ -252,82 +213,33 @@ int porownajAmin(int wiersz1, int kolumna1, int wiersz2, int kolumna2)
 }
 
 
-void wpiszZasiegTabl(string poziom)
+int indexTablicy(int wiersz, int kolumna)
 {
-    for(int i = 0; i < ROZM_TAB; i++)
-    {
-        int wiersz = -1;
-        int kolumn = -1;
-        int kolMin = MAX_LICZ_ELEM;
-        int kolMax = -1;
-        for(int j = 0; j < MAX_LICZ_ELEM; j++)
-        {
-            if( skojarzTabl[i][j].wiersz != -1)
-                wiersz = skojarzTabl[i][j].wiersz;
-            kolumn = skojarzTabl[i][j].kolumna;
-            if(kolumn > -1 && kolMax < kolumn)
-                kolMax = kolumn;
-            if(kolumn > -1 && kolMin > kolumn)
-                kolMin = kolumn;
-        }
-        if( wiersz != -1)
-        {
-            kolMax = kolMax + okno - 1;
-            cout << " wiersz: " << wiersz
-                 << " kolMin: " << kolMin
-                 << " kolMax: " << kolMax << endl;
-            zasiegTabl[wiersz][kolMin].przed =
-                zasiegTabl[wiersz][kolMin].przed + "[" + poziom + ">";
-            zasiegTabl[wiersz][kolMax].po    =
-                "<" + poziom + "]" + zasiegTabl[wiersz][kolMax].po;
-        }
-    }
-    cout << endl;
+    return wiersz * MAX_LICZ_ELEM + kolumna;
 }
 
 
-void drukujBialka()
+void utworzGrafSkojarzen()
 {
-    int drukPrzerwy = 0;
-    for(int j = 0; j < MAX_LICZ_ELEM; j++)
+    grafSkojarzen = new int *[ROZM_TAB * MAX_LICZ_ELEM];
+    for ( int i = 0; i < ROZM_TAB * MAX_LICZ_ELEM; ++i )
     {
-        for(int i = 0; i < ROZM_TAB; i++)
-        {
-            int wiersz = skojarzTabl[i][j].wiersz;
-            int kolumn = skojarzTabl[i][j].kolumna;
-            if(wiersz == -1 || kolumn == -1 )
-                break;
-            string amino  = instancja[wiersz].amino.substr(kolumn, okno);
-            string aminoW = "";
-            for(int i = 0; i < okno; i++)
-            {
-                if ( instancja[wiersz].wagi[kolumn + i] > wiarygodnosc)
-                    aminoW = aminoW + amino.substr(i, 1);
-            }
-
-            if( skojarzTabl[i][j].wiersz > -1)
-            {
-                cout << " wiersz: " << wiersz
-                     << " kolumn: " << kolumn
-                     << " amino:"   << amino
-                     << " aminoW: " << aminoW
-                     << endl;
-                drukPrzerwy = 1;
-            }
-        }
-        if( drukPrzerwy == 1)
-        {
-            cout << endl;
-            drukPrzerwy = 0;
-        }
+        grafSkojarzen[i] = new int [ROZM_TAB * MAX_LICZ_ELEM];
+        for(int j = 0; j < ROZM_TAB * MAX_LICZ_ELEM; j++)
+            grafSkojarzen[i][j] = -1;
     }
 }
 
 
+void drukujGrafSkojarzen()
+{
+    for(int i = 0; i < ROZM_TAB * MAX_LICZ_ELEM; i++)
+        for(int j = 0; j < ROZM_TAB * MAX_LICZ_ELEM; j++)
+            if(grafSkojarzen[i][j] == 1)
+                cout << "grafSkojarzen[" << i << "][" << j << "]=" << grafSkojarzen[i][j] << endl;
+}
 
-//
-// odczytanie danych z pliku do tablicy
-//
+
 void odczytajZPliku(const char * nazwaPliku)
 {
     fstream plik;
@@ -347,7 +259,7 @@ void odczytajZPliku(const char * nazwaPliku)
 
         instancja[element].amino = lineAmin;
         liczAmin =  lineAmin.length() + 1;
-        // cout << "Amin: " << instancja[element].amino[liczAmin] << endl;
+        cout << "Amin: " << instancja[element].amino[liczAmin] << endl;
         getline(plik,lineWag);
 
         const char * bufWag = lineWag.c_str();
@@ -369,7 +281,7 @@ void odczytajZPliku(const char * nazwaPliku)
                 buflicz[j] = '\0';
                 dana = atoi(buflicz);
                 instancja[element].wagi[liczWag] = dana;
-                // cout << instancja[element].wagi[liczWag] << " ";
+                cout << instancja[element].wagi[liczWag] << " ";
                 liczWag++;
                 j = 0;
             }
@@ -380,58 +292,23 @@ void odczytajZPliku(const char * nazwaPliku)
 
         liczAmin-=1;
         liczWag-=1;
+        if(liczAmin != liczWag)
+        {
+            cout << "Rozna liczba elementow na pozycji: " << element << endl;
+            cout << "Liczba Amin: " << liczAmin << endl;
+            cout << "Liczba Wag: " << liczWag << endl;
+            cout << "Wybieram mniejsz¹ wartosc." << endl;
+        }
 
         instancja[element].liczElem = liczAmin > liczWag ? liczWag : liczAmin;
 
+        cout << endl << "Koniec instancji" << endl;
 
         cout << "Amin: " << element << "  " << lineAmin << endl;
-        cout << "Wag: " << element << "  " << lineWag << endl << endl;
+        cout << "Wag: " << element << "  " << lineWag << endl;
         element++;
     }
 
     plik.close();
-    printf("Odczyt z pliku %s zakonczony powodzeniem.\n\n", nazwaPliku);
-}
-
-void zerujSkojarzTablPoz()
-{
-    for(int i = 0; i < ROZM_TAB; i++)
-        for(int j = 0; j < MAX_LICZ_ELEM; j++)
-        {
-            skojarzTabl[i][j].wiersz = -1;
-            skojarzTabl[i][j].kolumna = -1;
-        }
-}
-
-void czyscZasiegTabl()
-{
-    for(int i = 0; i < ROZM_TAB; i++)
-        for(int j = 0; j < MAX_LICZ_ELEM; j++)
-        {
-            zasiegTabl[i][j].przed = "";
-            zasiegTabl[i][j].po = "";
-        }
-}
-
-void wpiszKoniecTabl()
-{
-    for(int i = 0; i < ROZM_TAB; i++)
-    {
-        unsigned int len = instancja[i].amino.length();
-        for( unsigned int j = 0; j < len; j++)
-        {
-            koniecTabl[i] = koniecTabl[i] +
-                            zasiegTabl[i][j].przed +
-                            instancja[i].amino.substr(j,1) +
-                            zasiegTabl[i][j].po;
-
-        }
-    }
-}
-
-void drukujKoniectabl()
-{
-    for(int i = 0; i < ROZM_TAB; i++)
-        cout <<  " wiersz: " << i << " Amino:" << koniecTabl[i] << endl;
-
+    printf("Odczyt z pliku %s zakonczony powodzeniem.\n", nazwaPliku);
 }
