@@ -58,6 +58,20 @@ int maxOpuszczone = 2;
 
 int main()
 {
+
+        printf("Podaj wartosc okna: ");
+    scanf("%d", &okno);
+    if ( 3 < okno > 8)
+    {
+        printf("Niepoprawny zakres liczby.\n");
+        printf("Podaj liczbe z zakresu 4 -7. \n");
+        printf("Podaj wartosc okna: ");
+        scanf("%d", &okno);
+    }
+    printf("Podaj wartosc wiarygodnosci: ");
+    scanf("%d", &wiarygodnosc);
+
+
     odczytajZPliku("instacja.txt");
     utworzGrafSkojarzen();
 
