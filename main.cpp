@@ -48,7 +48,7 @@ void drukujGrafSkojarzen();
 void zerujSkojarzTablPoz();
 void szukajKlik();
 void drukujKlik();
-
+void drukKlikMin();
 int okno = 4;
 int wiarygodnosc = 5;
 
@@ -60,10 +60,12 @@ int main()
 {
     odczytajZPliku("instacja.txt");
     utworzGrafSkojarzen();
+
     porownaj();
-   // drukujGrafSkojarzen();
+    drukujGrafSkojarzen();
     szukajKlik();
     drukujKlik();
+    drukKlikMin();
 }
 
 void szukajKlik()
@@ -108,14 +110,66 @@ void drukujKlik()
         {
             if(kliki[i][j].liczElem == 0)
                 continue;
-              cout << " w1="  << kliki[i][j].p1.wiersz << "," << " k1=" << kliki[i][j].p1.kolumna
+            cout << " w1="  << kliki[i][j].p1.wiersz << "," << " k1=" << kliki[i][j].p1.kolumna
                  << " w2="  << kliki[i][j].p2.wiersz << "," << " k2=" << kliki[i][j].p2.kolumna
                  << " liczbaEl=" << kliki[i][j].liczElem
-                 << " Amino1:" << instancja[kliki[i][j].p1.wiersz].amino.substr(kliki[i][j].p1.kolumna, okno)
-                 << " Amino2:" << instancja[kliki[i][j].p2.wiersz].amino.substr(kliki[i][j].p2.kolumna, okno)
-                << endl;
+                 << " Amino1:" << instancja[kliki[i][j].p1.wiersz].amino.substr(kliki[i][j].p1.kolumna, okno + kliki[i][j].liczElem - 1)
+                 << " Amino2:" << instancja[kliki[i][j].p2.wiersz].amino.substr(kliki[i][j].p2.kolumna, okno + kliki[i][j].liczElem - 1)
+                 << endl;
         }
 }
+
+void drukKlikMin()
+{
+    cout << " Wydruk klik" << endl;
+    int popWiersz = 0;
+    int popKol = 0;
+    int popMinWar = 0;
+    int maxWiersz = 0;
+    int maxKol = 0;
+    int maxElem = 0;
+    for(int i = 0; i < MAX_LICZ_ELEM; i++)
+        for(int j = 0; j < MAX_LICZ_ELEM; j++)
+        {
+            if(kliki[i][j].liczElem == 0)
+                continue;
+            if( popWiersz != kliki[i][j].p1.wiersz ||
+                    popKol != kliki[i][j].p1.kolumna)
+            {
+                if( maxElem < popMinWar)
+                {
+                    maxElem   = popMinWar;
+                    maxWiersz = popWiersz;
+                    maxKol    = popKol;
+                }
+
+                cout << " w="  << popWiersz << "," << " k=" << popKol
+                     << " elem=" << popMinWar
+                     << " Amino:" << instancja[popWiersz].amino.substr(popKol, okno + popMinWar - 1)
+                     << endl;
+                popMinWar = 0;
+            }
+            popWiersz = kliki[i][j].p1.wiersz;
+            popKol    = kliki[i][j].p1.kolumna;
+            if(popMinWar == 0)
+                popMinWar = kliki[i][j].liczElem;
+            else
+                popMinWar = popMinWar < kliki[i][j].liczElem ? popMinWar : kliki[i][j].liczElem;
+        }
+    cout << " w="  << popWiersz << "," << " k=" << popKol
+         << " elem=" << popMinWar
+         << " Amino:" << instancja[popWiersz].amino.substr(popKol, okno + popMinWar - 1)
+         << endl;
+
+    cout << "Najdluzszy element:" << endl;
+     cout << " w="  << maxWiersz << "," << " k=" << maxKol
+         << " elem=" << maxElem
+         << " Amino:" << instancja[maxWiersz].amino.substr(maxKol, okno + maxElem - 1)
+         << endl;
+
+
+}
+
 
 
 int dajiWylaczSkos(unsigned int wiersz, unsigned int kolumna)
@@ -125,10 +179,10 @@ int dajiWylaczSkos(unsigned int wiersz, unsigned int kolumna)
     int liczElem = 0;
     while(grafSkojarzen[wWiersz][wKol] == 1)
     {
+        liczElem++;
         grafSkojarzen[wWiersz][wKol] = 2;
         wWiersz++;
         wKol++;
-        liczElem++;
     }
     return liczElem;
 }
@@ -163,12 +217,12 @@ void porownaj()
                     if( ret == 1)
                     {
                         grafSkojarzen[indexTablicy(wiersz1, kolumna1)][indexTablicy(wiersz2, kolumna2)] = 1;
-                    //    grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 1;
+                        //    grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 1;
                     }
                     else
                     {
                         grafSkojarzen[indexTablicy(wiersz1, kolumna1)][indexTablicy(wiersz2, kolumna2)] = 0;
-                    //    grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 0;
+                        //    grafSkojarzen[indexTablicy(wiersz2, kolumna2)][indexTablicy(wiersz1, kolumna1)] = 0;
 
                     }
                 }
