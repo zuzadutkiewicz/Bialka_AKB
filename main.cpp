@@ -35,15 +35,13 @@ struct sekwencja
     int liczElem;
 };
 
-struct skojarz
+struct wKlik
 {
     int wiersz;
     int kolumna;
 } ;
 
-struct skojarz skojarzTabl[ROZM_TAB][MAX_LICZ_ELEM];
-int skojarzMaxOdl = 0;
-int skojarzGlebokosc = 0;
+struct wKlik tablicaKlik[ROZM_TAB][MAX_LICZ_ELEM];
 
 struct zasieg
 {
@@ -63,11 +61,11 @@ void wpiszZasiegTabl(string poziom);
 
 void odczytajZPliku(const char * nazwaPliku);
 int porownajAmin(int wiersz1, int  kolumna1, int wiersz2, int kolumna2);
-int skojarzNast(int skojarzWiersz, int skojarzKol, int wiersz, int kolumna, struct skojarz * skojarzTmp);
+int wKlikNast(int wKlikWiersz, int wKlikKol, int wiersz, int kolumna, struct wKlik * wKlikTmp);
 void zerujSkojarzTablPoz();
 void czyscZasiegTabl();
-int generujBialka();
-int nastepnyPoziom(int poziom, int skojarzKol, int wiersz, int kolumna);
+int generujKliki();
+int nastepnyPoziom(int poziom, int wKlikKol, int wiersz, int kolumna);
 void drukujBialka();
 
 // parametry
@@ -76,7 +74,7 @@ int wiarygodnosc = 26;
 
 int maxOpuszczone = 5;
 int minLiczElem = 3;
-int glebokoscSzukania = 2;
+int dlugoscKlik = 2;
 
 
 int main()
@@ -94,20 +92,20 @@ int main()
     scanf("%d", &wiarygodnosc);
 
     odczytajZPliku("instacja.txt");
-    generujBialka();
+    generujKliki();
     wpiszKoniecTabl();
     drukujKoniectabl();
 }
 
 
-int generujBialka()
+int generujKliki()
 {
 
-    for(int wierszX = 0; wierszX < 4; wierszX++)
+    for(int wierszX = 0; wierszX < 7; wierszX++)
     {
         int opuszczone = 0;
         int liczbaElem = 0;
-        int skojarzKol = 0;
+        int wKlikKol = 0;
         int znalezione = 0;
         int poziomZasiegu = 0;
         int wiersz = wierszX % ROZM_TAB;
@@ -115,14 +113,14 @@ int generujBialka()
 
         for(int kolumna = 0; kolumna < MAX_LICZ_ELEM - okno; kolumna++)
         {
-            int skojarzWiersz = 0;
-            int jest = nastepnyPoziom(skojarzWiersz, skojarzKol, wiersz, kolumna);
+            int wKlikWiersz = 0;
+            int jest = nastepnyPoziom(wKlikWiersz, wKlikKol, wiersz, kolumna);
             if(jest == 1 )
             {
                 liczbaElem = liczbaElem + 1;
-                skojarzTabl[skojarzWiersz][skojarzKol].wiersz = wiersz;
-                skojarzTabl[skojarzWiersz][skojarzKol].kolumna = kolumna;
-                skojarzKol++;
+                tablicaKlik[wKlikWiersz][wKlikKol].wiersz = wiersz;
+                tablicaKlik[wKlikWiersz][wKlikKol].kolumna = kolumna;
+                wKlikKol++;
             }
             else
                 opuszczone = opuszczone + 1;
@@ -144,10 +142,10 @@ int generujBialka()
                 }
                 zerujSkojarzTablPoz();
                 liczbaElem = 0;
-                skojarzKol = 0;
+                wKlikKol = 0;
             }
             // przejscie do nastepnej kolumny
-            // skojarzKol++;
+            // wKlikKol++;
         }
         if(liczbaElem >= minLiczElem)
         {
@@ -162,20 +160,20 @@ int generujBialka()
 }
 
 
-int nastepnyPoziom(int skojarzWiersz, int skojarzKol, int wiersz, int kolumna)
+int nastepnyPoziom(int wKlikWiersz, int wKlikKol, int wiersz, int kolumna)
 {
-    struct skojarz skojarzTmp;
+    struct wKlik wKlikTmp;
     wiersz++;
     wiersz = wiersz % ROZM_TAB;
-    skojarzWiersz++;
-    if(skojarzWiersz >= glebokoscSzukania)
+    wKlikWiersz++;
+    if(wKlikWiersz >= dlugoscKlik)
         return 1;
-    if(skojarzNast(skojarzWiersz, skojarzKol, wiersz, kolumna, &skojarzTmp) == 1)
+    if(wKlikNast(wKlikWiersz, wKlikKol, wiersz, kolumna, &wKlikTmp) == 1)
     {
-        if( nastepnyPoziom(skojarzWiersz, skojarzKol, skojarzTmp.wiersz, skojarzTmp.kolumna) == 1)
+        if( nastepnyPoziom(wKlikWiersz, wKlikKol, wKlikTmp.wiersz, wKlikTmp.kolumna) == 1)
         {
-            skojarzTabl[skojarzWiersz][skojarzKol].wiersz  = skojarzTmp.wiersz;
-            skojarzTabl[skojarzWiersz][skojarzKol].kolumna = skojarzTmp.kolumna;
+            tablicaKlik[wKlikWiersz][wKlikKol].wiersz  = wKlikTmp.wiersz;
+            tablicaKlik[wKlikWiersz][wKlikKol].kolumna = wKlikTmp.kolumna;
             return 1;
         }
     }
@@ -185,14 +183,14 @@ int nastepnyPoziom(int skojarzWiersz, int skojarzKol, int wiersz, int kolumna)
 
 
 
-int skojarzNast(int skojarzWiersz, int skojarzKol, int wiersz, int kolumna, struct skojarz * skojarzTmp)
+int wKlikNast(int wKlikWiersz, int wKlikKol, int wiersz, int kolumna, struct wKlik * wKlikTmp)
 {
     // na podstawie linia i kolumna ustalic poprzednie wartosci
     // w danym wierszu z ewentualnym przesuniecie o maxOpuszczone
     int kolumnaTmp = 0;
 
-    if(skojarzKol > 0)
-        kolumnaTmp = skojarzTabl[skojarzWiersz][skojarzKol - 1].kolumna + 1;
+    if(wKlikKol > 0)
+        kolumnaTmp = tablicaKlik[wKlikWiersz][wKlikKol - 1].kolumna + 1;
 
     // nie moze przekraczac maksymalnej liczby elementow
     int kolumnaMax = kolumnaTmp + maxOpuszczone > MAX_LICZ_ELEM ? MAX_LICZ_ELEM : kolumnaTmp + maxOpuszczone;
@@ -202,8 +200,8 @@ int skojarzNast(int skojarzWiersz, int skojarzKol, int wiersz, int kolumna, stru
         int jestRowne = porownajAmin(wiersz -1, kolumna, wiersz, i);
         if( jestRowne == 1 )
         {
-            skojarzTmp->wiersz = wiersz;
-            skojarzTmp->kolumna = i;
+            wKlikTmp->wiersz = wiersz;
+            wKlikTmp->kolumna = i;
             return 1;
         }
     }
@@ -259,9 +257,9 @@ void wpiszZasiegTabl(string poziom)
         int kolMax = -1;
         for(int j = 0; j < MAX_LICZ_ELEM; j++)
         {
-            if( skojarzTabl[i][j].wiersz != -1)
-                wiersz = skojarzTabl[i][j].wiersz;
-            kolumn = skojarzTabl[i][j].kolumna;
+            if( tablicaKlik[i][j].wiersz != -1)
+                wiersz = tablicaKlik[i][j].wiersz;
+            kolumn = tablicaKlik[i][j].kolumna;
             if(kolumn > -1 && kolMax < kolumn)
                 kolMax = kolumn;
             if(kolumn > -1 && kolMin > kolumn)
@@ -290,8 +288,8 @@ void drukujBialka()
     {
         for(int i = 0; i < ROZM_TAB; i++)
         {
-            int wiersz = skojarzTabl[i][j].wiersz;
-            int kolumn = skojarzTabl[i][j].kolumna;
+            int wiersz = tablicaKlik[i][j].wiersz;
+            int kolumn = tablicaKlik[i][j].kolumna;
             if(wiersz == -1 || kolumn == -1 )
                 break;
             string amino  = instancja[wiersz].amino.substr(kolumn, okno);
@@ -302,7 +300,7 @@ void drukujBialka()
                     aminoW = aminoW + amino.substr(i, 1);
             }
 
-            if( skojarzTabl[i][j].wiersz > -1)
+            if( tablicaKlik[i][j].wiersz > -1)
             {
                 cout << " wiersz: " << wiersz
                      << " kolumn: " << kolumn
@@ -395,8 +393,8 @@ void zerujSkojarzTablPoz()
     for(int i = 0; i < ROZM_TAB; i++)
         for(int j = 0; j < MAX_LICZ_ELEM; j++)
         {
-            skojarzTabl[i][j].wiersz = -1;
-            skojarzTabl[i][j].kolumna = -1;
+            tablicaKlik[i][j].wiersz = -1;
+            tablicaKlik[i][j].kolumna = -1;
         }
 }
 
