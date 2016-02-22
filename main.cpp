@@ -36,6 +36,7 @@ struct klik kliki[MAX_LICZ_ELEM][MAX_LICZ_ELEM];
 struct grupaKlik
 {
     struct wierzcholek wKlik;
+    string nukleo;
     int liczbaWierszy;
     int liczbaElementow;
     struct wierzcholek listaWierzch[100];
@@ -62,6 +63,7 @@ void zerujSkojarzTablPoz();
 void szukajKlik();
 void drukujKlik();
 void grupujKlik();
+void drukGrupyKlik();
 void zerujGrupyKlik();
 
 // wielkosc okna
@@ -93,10 +95,11 @@ int main()
     utworzGrafSkojarzen();
 
     porownaj();
-    drukujGrafSkojarzen();
+    // drukujGrafSkojarzen();
     szukajKlik();
     drukujKlik();
     grupujKlik();
+    drukGrupyKlik();
 }
 
 void szukajKlik()
@@ -159,6 +162,8 @@ void grupujKlik()
     int maxWiersz = 0;
     int maxKol = 0;
     int maxElem = 0;
+    int grupaLiczba = 0;
+    int klikGrupa = 0;
     for(int i = 0; i < MAX_LICZ_ELEM; i++)
         for(int j = 0; j < MAX_LICZ_ELEM; j++)
         {
@@ -173,27 +178,45 @@ void grupujKlik()
                     maxWiersz = popWiersz;
                     maxKol    = popKol;
                 }
-
-                cout << " w="  << popWiersz << "," << " k=" << popKol
+                grupyKlik[klikGrupa].wKlik.wiersz = popWiersz;
+                grupyKlik[klikGrupa].wKlik.kolumna = popKol;
+                grupyKlik[klikGrupa].liczbaWierszy =  grupaLiczba;
+                grupyKlik[klikGrupa].liczbaElementow = popMinWar;
+                grupyKlik[klikGrupa].nukleo = instancja[popWiersz].amino.substr(popKol, okno + popMinWar - 1);
+                cout << " klikGrupa=" << klikGrupa;
+                cout << " w="  << popWiersz << "," << " k=" << popKol << " grupaLiczba=" << grupaLiczba
                      << " elem=" << popMinWar
                      << " Amino:" << instancja[popWiersz].amino.substr(popKol, okno + popMinWar - 1)
                      << endl;
                 popMinWar = 0;
+                grupaLiczba = 0;
+                klikGrupa++;
             }
+            grupaLiczba++;
             popWiersz = kliki[i][j].p1.wiersz;
             popKol    = kliki[i][j].p1.kolumna;
+            grupyKlik[klikGrupa].listaWierzch[grupaLiczba].wiersz = kliki[i][j].p1.wiersz;
+            grupyKlik[klikGrupa].listaWierzch[grupaLiczba].kolumna = kliki[i][j].p1.kolumna;
             if(popMinWar == 0)
                 popMinWar = kliki[i][j].liczElem;
             else
                 popMinWar = popMinWar < kliki[i][j].liczElem ? popMinWar : kliki[i][j].liczElem;
         }
+
+    grupyKlik[klikGrupa].wKlik.wiersz = popWiersz;
+    grupyKlik[klikGrupa].wKlik.kolumna = popKol;
+    grupyKlik[klikGrupa].liczbaWierszy =  grupaLiczba;
+    grupyKlik[klikGrupa].liczbaElementow = popMinWar;
+    grupyKlik[klikGrupa].nukleo = instancja[popWiersz].amino.substr(popKol, okno + popMinWar - 1);
+
+
     cout << " w="  << popWiersz << "," << " k=" << popKol
          << " elem=" << popMinWar
          << " Amino:" << instancja[popWiersz].amino.substr(popKol, okno + popMinWar - 1)
          << endl;
 
     cout << "Najdluzszy element:" << endl;
-     cout << " w="  << maxWiersz << "," << " k=" << maxKol
+    cout << " w="  << maxWiersz << "," << " k=" << maxKol
          << " elem=" << maxElem
          << " Amino:" << instancja[maxWiersz].amino.substr(maxKol, okno + maxElem - 1)
          << endl;
@@ -201,6 +224,65 @@ void grupujKlik()
 
 }
 
+
+void drukGrupyKlik()
+{
+    int wiersz = 0;
+    int maxWiersz = -1;
+    int maxElem = 0;
+    cout << " GrupyKlik" << endl;
+    while(grupyKlik[wiersz].liczbaWierszy != 0)
+    {
+
+        cout << " w=" << grupyKlik[wiersz].wKlik.wiersz
+             << " k=" << grupyKlik[wiersz].wKlik.kolumna
+             << " liczEl=" << grupyKlik[wiersz].liczbaElementow
+             << " liczW=" << grupyKlik[wiersz].liczbaWierszy
+             << " Nukleo:" << grupyKlik[wiersz].nukleo
+             << endl;
+
+        if(grupyKlik[wiersz].liczbaWierszy >= 3)
+            if( maxElem == 0)
+            {
+                maxElem = grupyKlik[wiersz].liczbaElementow;
+                maxWiersz = wiersz;
+            }
+            else
+            {
+                if( maxElem < grupyKlik[wiersz].liczbaElementow)
+                {
+                    maxElem = grupyKlik[wiersz].liczbaElementow;
+                    maxWiersz = wiersz;
+                }
+            }
+        wiersz++;
+    }
+
+    if(maxWiersz == -1)
+    {
+        cout << " Brak";
+        return;
+    }
+    cout << " Koncowy motyw konsensusowy:" << endl;
+
+    cout << " w=" << grupyKlik[maxWiersz].wKlik.wiersz
+         << " k=" << grupyKlik[maxWiersz].wKlik.kolumna
+         << " liczEl=" << grupyKlik[maxWiersz].liczbaElementow
+         << " liczW=" << grupyKlik[maxWiersz].liczbaWierszy
+         << " Nukleo:" << grupyKlik[maxWiersz].nukleo
+         << endl;
+
+}
+void zerujGrupyKlik()
+{
+    for(int i = 0; i < MAX_LICZ_ELEM; i++)
+    {
+        grupyKlik[i].liczbaElementow = 0;
+        grupyKlik[i].liczbaWierszy = 0;
+        grupyKlik[i].wKlik.wiersz = 0;
+        grupyKlik[i].wKlik.kolumna = 0;
+    }
+}
 
 int dajiWylaczSkos(unsigned int wiersz, unsigned int kolumna)
 {
