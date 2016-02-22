@@ -18,7 +18,7 @@ struct sekwencja
     int liczElem;
 };
 
-struct pozycja
+struct wierzcholek
 {
     int wiersz;
     int kolumna;
@@ -26,12 +26,25 @@ struct pozycja
 
 struct klik
 {
-    struct pozycja p1;
-    struct pozycja p2;
+    struct wierzcholek p1;
+    struct wierzcholek p2;
     int liczElem;
 } ;
 
 struct klik kliki[MAX_LICZ_ELEM][MAX_LICZ_ELEM];
+
+struct grupaKlik
+{
+    struct wierzcholek wKlik;
+    int liczbaWierszy;
+    int liczbaElementow;
+    struct wierzcholek listaWierzch[100];
+};
+
+
+
+
+struct grupaKlik grupyKlik[MAX_LICZ_ELEM];
 int skojarzMaxOdl = 0;
 int skojarzGlebokosc = 0;
 
@@ -40,7 +53,7 @@ int **grafSkojarzen;
 
 void odczytajZPliku(const char * nazwaPliku);
 void porownaj();
-int porownajAmin(unsigned int wiersz1, unsigned int  kolumna1, unsigned int wiersz2, unsigned int kolumna2);
+int porownajNukleotydy(unsigned int wiersz1, unsigned int  kolumna1, unsigned int wiersz2, unsigned int kolumna2);
 int indexTablicy(int wiersz, int kolumna);
 int dajiWylaczSkos(unsigned int wiersz, unsigned int kolumna);
 void utworzGrafSkojarzen();
@@ -48,10 +61,14 @@ void drukujGrafSkojarzen();
 void zerujSkojarzTablPoz();
 void szukajKlik();
 void drukujKlik();
-void drukKlikMin();
-int okno = 4;
-int wiarygodnosc = 5;
+void grupujKlik();
+void zerujGrupyKlik();
 
+// wielkosc okna
+int okno = 4;
+// wiarygodnosc
+int wiarygodnosc = 5;
+// maksymalna liczba opuszczonych elementow
 int maxOpuszczone = 2;
 
 
@@ -59,9 +76,9 @@ int maxOpuszczone = 2;
 int main()
 {
 
-        printf("Podaj wartosc okna: ");
+    printf("Podaj wartosc okna: ");
     scanf("%d", &okno);
-    if ( 3 < okno > 8)
+    while (okno < 3  || 8 < okno)
     {
         printf("Niepoprawny zakres liczby.\n");
         printf("Podaj liczbe z zakresu 4 -7. \n");
@@ -79,7 +96,7 @@ int main()
     drukujGrafSkojarzen();
     szukajKlik();
     drukujKlik();
-    drukKlikMin();
+    grupujKlik();
 }
 
 void szukajKlik()
@@ -133,7 +150,7 @@ void drukujKlik()
         }
 }
 
-void drukKlikMin()
+void grupujKlik()
 {
     cout << " Wydruk klik" << endl;
     int popWiersz = 0;
@@ -185,19 +202,27 @@ void drukKlikMin()
 }
 
 
-
 int dajiWylaczSkos(unsigned int wiersz, unsigned int kolumna)
 {
     int wWiersz = wiersz;
     int wKol = kolumna;
     int liczElem = 0;
-    while(grafSkojarzen[wWiersz][wKol] == 1)
+    int pomin = 0;
+    while(grafSkojarzen[wWiersz][wKol] == 1 || pomin <= maxOpuszczone)
     {
+        if(grafSkojarzen[wWiersz][wKol] != 1 )
+            pomin++;
+
         liczElem++;
-        grafSkojarzen[wWiersz][wKol] = 2;
+        if(grafSkojarzen[wWiersz][wKol] == 1)
+            grafSkojarzen[wWiersz][wKol] = 2;
         wWiersz++;
         wKol++;
     }
+    // cofniecie pominietych elementow
+    if(grafSkojarzen[wWiersz -1 ][wKol -1] != 1)
+        liczElem = liczElem - pomin;
+
     return liczElem;
 }
 
@@ -226,7 +251,7 @@ void porownaj()
             for (int kolumna1 = 0; kolumna1 < instancja[wiersz1].liczElem - okno; kolumna1++)
                 for (int kolumna2 =0; kolumna2 < instancja[wiersz2].liczElem - okno; kolumna2++)
                 {
-                    int ret = porownajAmin(wiersz1, kolumna1, wiersz2, kolumna2);
+                    int ret = porownajNukleotydy(wiersz1, kolumna1, wiersz2, kolumna2);
 
                     if( ret == 1)
                     {
@@ -244,7 +269,7 @@ void porownaj()
 }
 
 
-int porownajAmin(unsigned int wiersz1, unsigned int kolumna1, unsigned int wiersz2, unsigned int kolumna2)
+int porownajNukleotydy(unsigned int wiersz1, unsigned int kolumna1, unsigned int wiersz2, unsigned int kolumna2)
 {
     if(kolumna1 + okno > instancja[wiersz1].amino.length() )
         return 0;
